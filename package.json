@@ -1,0 +1,21 @@
+{
+  "name": "dream-forge",
+  "version": "1.0.0",
+  "description": "AI Bedtime Stories",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "ts-node ./src/index.ts"
+  },
+  "author": "cwd <cwd@lazybaer.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "langchain": "^0.3.2",
+    "pinata": "^1.5.0"
+  }
+}
