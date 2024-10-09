@@ -5,7 +5,7 @@ import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { JsonOutputParser, StringOutputParser } from '@langchain/core/output_parsers'
 import { DallEAPIWrapper } from "@langchain/openai"
 
-import { AuthTestResponse, GroupResponseItem, PinataSDK, UploadResponse } from "pinata"
+import { AuthTestResponse, DeleteResponse, FileListItem, FileListResponse, GetCIDResponse, GroupListResponse, GroupResponseItem, PinataSDK, UploadResponse } from "pinata"
 
 interface StoryPart {
   title: string
@@ -19,6 +19,8 @@ interface StoryObject {
 const LLM_OAI_KEY = env.LLM_OAI_KEY ?? ''
 const PINTATA_JWT = env.PINTATA_JWT ?? ''
 const PINTATA_GATEWAY = env.PINTATA_GATEWAY ?? 'aquamarine-smart-butterfly-519.mypinata.cloud'
+const PINATA_INDEX_GROUP_NAME = env.PINATA_INDEX_GROUP_NAME ?? 'DREAMFORGE'
+const PINATA_INDEX_FILE_NAME = env.PINATA_INDEX_FILE_NAME ?? 'index.txt'
 const MODEL_OAI = env.MODEL_OAI ?? 'gpt-4o-mini'
 const MODEL_DALLE = env.MODEL_DALLE ?? 'dall-e-3'
 const STORY_PARTS = env.STORY_PARTS ?? 3
@@ -39,6 +41,64 @@ const model = new ChatOpenAI({
 // sew content together in HTML
 // push content to IPFS
 // share URL to user
+
+const upsertPinataIndexGroup = async (indexName: string) => {
+  const pinata = new PinataSDK({
+    pinataJwt: PINTATA_JWT,
+    pinataGateway: PINTATA_GATEWAY,
+  })
+
+  let group: GroupResponseItem
+  const groups: GroupListResponse = await pinata.groups.list().name(indexName)
+  console.log(groups)
+  if (groups.groups.length === 0) {
+    console.log(`Cannot find index group: ${indexName}`)
+    group = await pinata.groups.create({
+      name: indexName,
+      isPublic: true
+    })
+  } else {
+    console.log('found groups')
+    group = groups.groups[0]
+  }
+  console.log(group)
+  return group
+}
+
+const updatePinataIndexFile = async (indexGroup: GroupResponseItem, fileName: string, content: string) => {
+  let newContent 
+  const pinata = new PinataSDK({
+    pinataJwt: PINTATA_JWT,
+    pinataGateway: PINTATA_GATEWAY,
+  })
+
+  const files: FileListResponse = await pinata.files.list().group(indexGroup.id).name(fileName)
+  
+  if (files.files.length === 0) {
+    console.log('no index file found')
+    newContent = content
+  } else {
+    const fileFound: FileListItem = files.files[0]
+    const file: GetCIDResponse = await pinata.gateways.get(fileFound.cid)
+    newContent = file.data + `\n${content}`
+    console.log(`updating the index file: ${newContent}`)
+    const deleteResp: DeleteResponse[] = await pinata.files.delete([fileFound.cid])
+    console.log(`deleted original file: ${deleteResp.length}`)
+  }
+
+  console.log('creating new index file')
+  const blob = new Blob([newContent], { type: 'text/plain' })
+  const file = new File([blob], 'index.txt', { type: 'text/plain' })
+  const upload: UploadResponse = await pinata.upload
+    .file(file)
+    .group(indexGroup.id)
+    .addMetadata({
+      name: fileName
+    })
+
+  console.log(upload)
+  return upload
+}
 
 const pushToPinata = async (content: StoryObject, images: string[]) => {
   const pinata = new PinataSDK({
@@ -64,7 +124,7 @@ const pushToPinata = async (content: StoryObject, images: string[]) => {
       .url(image)
       .group(group.id)
       .addMetadata({
-        name: `image_${index}`
+        name: `image_${index}` 
       })
 
     return upload
@@ -114,6 +174,8 @@ const generateImagePrompt = async (content: string) => {
 }
 
 const main = async (prompt: string) => {
+  const indexGroup = await upsertPinataIndexGroup(PINATA_INDEX_GROUP_NAME)
+
   const messages = [
     new SystemMessage('You are an expert story teller, especially in regards to Grimms fairy tales and other classical stories.'),
     new HumanMessage(`tell me a story around this concept ${prompt}. The story should have ${STORY_PARTS} parts. Return the story as a JSON object that has the title of the story in a field called "title" and an array called "story" with the story parts in the form "title" and "content". Only return the JSON and nothing else`),
@@ -142,6 +204,8 @@ const main = async (prompt: string) => {
   //save images to IPFS
   const pinataUploads = await pushToPinata(storyObj, imageURLs)
   console.log(pinataUploads)
+  const indexFile = await updatePinataIndexFile(indexGroup, PINATA_INDEX_FILE_NAME, pinataUploads?.group?.id ?? '')
+  console.log(indexFile)
 }
 
 main('a story about an anthropomorphic bear who discovers a mine full of honey')
