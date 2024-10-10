@@ -36,6 +36,17 @@ const fetchGroupFiles = async (groupCId: string) => {
   return files
 }
 
+const fetchFile = async (fileCId: string, asString?: boolean): Promise<string | Blob> => {
+  const file: GetCIDResponse = await pinata.gateways.get(fileCId)
+  console.log(file)
+  const data = file.data as Blob
+
+  if (asString)
+    return await data.text() 
+
+  return data
+}
+
 const fetchPinataIndexFileContents = async (indexGroup: GroupResponseItem, fileName: string): Promise<String> => {
   const files: FileListResponse = await pinata.files.list().group(indexGroup.id).name(fileName)
   console.log(files)
@@ -64,9 +75,7 @@ const updatePinataIndexFile = async (indexGroup: GroupResponseItem, fileName: st
     console.log(`Found files: ${files.files.length} / ${JSON.stringify(files.files[0])}`)
     const fileFound: FileListItem = files.files[0]
     console.log(fileFound.cid)
-    const file: GetCIDResponse = await pinata.gateways.get(fileFound.cid)
-    const data = file.data as Blob
-    newContent = await data.text() + `\n${content}`
+    newContent = await fetchFile(fileFound.cid, true) as string
     console.log(`updating the index file: ${newContent}`)
     const deleteResp: DeleteResponse[] = await pinata.files.delete([fileFound.cid])
     console.log(`deleted original file: ${JSON.stringify(deleteResp)}`)
@@ -125,4 +134,4 @@ const pushToPinata = async (content: StoryObject, images: string[]) => {
   return { group, contentUpload, imagesUploaded }
 }
 
-export { upsertPinataIndexGroup, updatePinataIndexFile, pushToPinata, fetchPinataIndexFileContents, fetchGroupFiles }
+export { upsertPinataIndexGroup, updatePinataIndexFile, pushToPinata, fetchPinataIndexFileContents, fetchGroupFiles, fetchFile }
