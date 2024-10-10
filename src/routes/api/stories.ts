@@ -5,7 +5,7 @@ import { PINATA_INDEX_FILE_NAME, PINATA_INDEX_GROUP_NAME } from '../../helpers/c
 
 const router = Router()
 
-router.get('/stories', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   const indexGroup = await upsertPinataIndexGroup(PINATA_INDEX_GROUP_NAME)
   const content = await fetchPinataIndexFileContents(indexGroup, PINATA_INDEX_FILE_NAME)
   const storiesGroups = content.split('\n')
@@ -16,7 +16,7 @@ router.get('/stories', async (req: Request, res: Response) => {
   res.json({ stories })
 })
 
-router.get('/stories/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   const groupId = req.params.id
   const files = await fetchGroupFiles(groupId)
   const storyParts = files.files.map((file) => {
@@ -26,7 +26,7 @@ router.get('/stories/:id', async (req: Request, res: Response) => {
   res.json({ storyParts })
 })
 
-router.get('/stories/:id/:part', async (req: Request, res: Response) => {
+router.get('/:id/:part', async (req: Request, res: Response) => {
   const groupId = req.params.id
   const partName = req.params.part
   const files = await fetchGroupFiles(groupId)
