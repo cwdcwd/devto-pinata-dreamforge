@@ -78,12 +78,15 @@ const updatePinataIndexFile = async (indexGroup: GroupResponseItem, fileName: st
     console.log('no index file found')
     newContent = content
   } else {
+    console.log(`Found files: ${files.files.length} / ${JSON.stringify(files.files[0])}`)
     const fileFound: FileListItem = files.files[0]
+    console.log(fileFound.cid)
     const file: GetCIDResponse = await pinata.gateways.get(fileFound.cid)
-    newContent = file.data + `\n${content}`
+    const data = file.data as Blob
+    newContent = await data.text() + `\n${content}`
     console.log(`updating the index file: ${newContent}`)
     const deleteResp: DeleteResponse[] = await pinata.files.delete([fileFound.cid])
-    console.log(`deleted original file: ${deleteResp.length}`)
+    console.log(`deleted original file: ${JSON.stringify(deleteResp)}`)
   }
 
   console.log('creating new index file')
