@@ -1,9 +1,9 @@
 import { env } from "process"
-import { createStory, generateImage, generateImagePrompt } from "./helpers/oai"
-import { pushToPinata, updatePinataIndexFile, upsertPinataIndexGroup } from "./helpers/pinata"
-import { PINATA_INDEX_FILE_NAME, PINATA_INDEX_GROUP_NAME } from "./helpers/const"
+import { createStory, generateImage, generateImagePrompt } from "./oai"
+import { pushToPinata, updatePinataIndexFile, upsertPinataIndexGroup } from "./pinata"
+import { PINATA_INDEX_FILE_NAME, PINATA_INDEX_GROUP_NAME } from "./const"
 
-const main = async (prompt: string) => {
+const generateStory = async (prompt: string) => {
   const indexGroup = await upsertPinataIndexGroup(PINATA_INDEX_GROUP_NAME)
   const storyObj = await createStory(prompt)
 
@@ -14,7 +14,7 @@ const main = async (prompt: string) => {
   console.log(aImagePrompts)
 
   const imageURLs = await Promise.all(aImagePrompts.map(async (imagePrompt) => {
-    return await generateImage(prompt)
+    return await generateImage(imagePrompt)
   }))
 
   console.log(imageURLs)
@@ -27,4 +27,5 @@ const main = async (prompt: string) => {
   console.log(indexFile)
 }
 
-main('a story about an anthropomorphic bear who discovers a mine full of honey')
+export default generateStory
+// main('a story about an anthropomorphic bear who discovers a mine full of honey')

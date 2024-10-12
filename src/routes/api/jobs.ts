@@ -1,10 +1,13 @@
 import { Router, Request, Response } from 'express'
 import Queue from 'bull'
+import generateStory from '../../helpers/generate'
+import { REDIS_URL } from '../../helpers/const'
+import { error } from 'console'
 
 const router = Router()
 
 
-const jobQueue = new Queue('jobQueue', 'redis://127.0.0.1:6379')
+const jobQueue = new Queue('jobQueue', REDIS_URL)
 
 router.post('/', async (req, res) => {
   const job = await jobQueue.add({ prompt: req.body?.prompt })
@@ -16,16 +19,13 @@ router.get('/:jobId', async (req, res) => {
   if (job === null) {
     res.status(404).json({ message: 'Job not found' })
   } else {
-    res.json({ jobId: job.id, status: job.finishedOn ? 'completed' : 'in progress' })
+    const failed = await job.isFailed()
+    res.json({ jobId: job.id, failedReason: job.failedReason, failed, status: job.finishedOn ? 'completed' : 'in progress' })
   }
 });
 
 
-jobQueue.process(async (job: any) => {
-  // Long-running process here
-  console.log('Processing job:', job.id)
-  // ...do work...
-});
+
 
 
 export default router

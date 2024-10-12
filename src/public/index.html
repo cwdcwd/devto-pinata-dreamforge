@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Forge: AI Bedtime Stories</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <style>
+        .main-container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .input-section {
+            padding: 10px;
+        }
+        .content-section {
+            display: flex;
+            height: 75vh;
+        }
+        .panel-left {
+            flex: 1;
+            padding: 10px;
+            border-right: 1px solid #e0e0e0;
+        }
+        .panel-right {
+            flex: 3;
+            padding: 10px;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="main-container">
+        <div class="input-section">
+            <div class="input-field">
+                <input id="input_text" type="text" class="validate">
+                <label for="input_text">Enter something</label>
+            </div>
+            <button class="btn waves-effect waves-light" type="submit" name="postStory" id="postStory">Submit</button>
+        </div>
+        <div class="content-section">
+            <div class="panel-left">
+                <ul class="collection" id="stories">
+                    <li class="collection-item">List Item 1</li>
+                    <li class="collection-item">List Item 2</li>
+                    <li class="collection-item">List Item 3</li>
+                </ul>
+            </div>
+            <div class="panel-right" id="storyContent">
+                <h5>Text Content</h5>
+                <p>This is some sample text content that will be displayed in the panel.</p>
+                <img src="https://via.placeholder.com/150" alt="Placeholder Image" class="responsive-img">
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+const loadStoryContent = (groupId, storyTitle) => {
+    fetch(`/api/stories/${groupId}`)
+        .then(response => response.json())
+        .then(data => {
+            const storyParts = data?.storyParts || [];
+
+            const storyContent = document.querySelector('#storyContent');
+            storyContent.innerHTML = ''; // Clear existing content
+
+            const title = document.createElement('h5');
+            title.textContent = data.storyTitle;
+            storyContent.appendChild(title);
+
+            const textParts = storyParts.filter(part => part.name.startsWith('text')).sort((a, b) => a.name.localeCompare(b.name));
+            const imageParts = storyParts.filter(part => part.name.startsWith('image')).sort((a, b) => a.name.localeCompare(b.name));
+
+            textParts.forEach((part, index) => {
+                const content = document.createElement('p');
+                content.className = 'flow-text';
+                content.id = `part-${part.name}`;
+
+                fetch(`/api/stories/${groupId}/${part.name}`) // Fetch part content and then update the content element
+                    .then(response => response.json())
+                    .then(partData => {
+                        const content = document.querySelector(`#part-${part.name}`);
+                        content.textContent = partData.text;
+                        storyContent.appendChild(content);
+                    })
+                    .catch(error => console.error('Error fetching story part content:', error));
+
+                const image = document.createElement('img');
+                // image.src = imageParts[index].imageUrl || 'https://via.placeholder.com/150';
+                image.src = `/api/stories/${groupId}/image_${index}`;
+                image.alt = `Part ${index}`;
+                image.className = 'responsive-img';
+
+                storyContent.appendChild(content);
+                storyContent.appendChild(image);
+            });
+        })
+        .catch(error => console.error('Error fetching story content:', error));
+};
+
+const reloadStories = () => {
+    fetch('/api/stories/')
+        .then(response => response.json())
+        .then(data => {
+            const collection = document.querySelector('#stories');
+            collection.innerHTML = ''; // Clear existing items
+            const stories = data?.stories || [];
+            stories.forEach(item => {
+                const listItem = document.createElement('li');
+                const storyLink = document.createElement('a');
+                storyLink.href = `#${item.groupId}`;
+                storyLink.textContent = item.title;
+                storyLink.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    loadStoryContent(item.groupId, item.title);
+                });
+                listItem.className = 'collection-item';
+                listItem.appendChild(storyLink);
+                // listItem.textContent = item.title;
+                collection.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error('Error fetching stories:', error));
+};
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitButton = document.querySelector('#postStory');
+        submitButton.addEventListener('click', function() {
+            const inputText = document.querySelector('#input_text').value;
+            fetch('/api/stories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: inputText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                jobId = data.jobId;
+
+                const checkStatus = setInterval(() => {
+                    fetch(`/api/jobs/${jobId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.failed === true) {
+                                clearInterval(checkStatus);
+                                console.error('Failed to generate story:', data.error);
+                            } else if (data.status === 'completed') {
+                                clearInterval(checkStatus);
+                                console.log('Story:', data.story);
+                                reloadStories();
+                            } else {
+                                console.log('Status:', data.status);
+                            }
+                        })
+                        .catch(error => {
+                            clearInterval(checkStatus);
+                            console.error('Error fetching story:', error);
+                        });
+                }, 3000);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        reloadStories();
+    });
+</script>
+</body>
+</html>

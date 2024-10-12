@@ -4,11 +4,11 @@ import { StoryObject, StoryPart } from "../types/Story"
 import exp from "constants"
 
 
-const PINTATA_JWT = env.PINTATA_JWT ?? ''
+const PINATA_JWT = env.PINATA_JWT ?? ''
 const PINTATA_GATEWAY = env.PINTATA_GATEWAY ?? 'aquamarine-smart-butterfly-519.mypinata.cloud'
 
 const pinata = new PinataSDK({
-  pinataJwt: PINTATA_JWT,
+  pinataJwt: PINATA_JWT,
   pinataGateway: PINTATA_GATEWAY,
 })
 
@@ -47,13 +47,13 @@ const fetchFile = async (fileCId: string, asString?: boolean): Promise<string | 
   return data
 }
 
-const fetchPinataIndexFileContents = async (indexGroup: GroupResponseItem, fileName: string): Promise<String> => {
+const fetchPinataIndexFileContents = async (indexGroup: GroupResponseItem, fileName: string): Promise<String | null> => {
   const files: FileListResponse = await pinata.files.list().group(indexGroup.id).name(fileName)
   console.log(files)
 
   if (files.files.length === 0) {
     console.log('no index file found')
-    return ''
+    return null
   }
 
   console.log(`Found files: ${files.files.length} / ${JSON.stringify(files.files[0])}`)
@@ -77,7 +77,7 @@ const updatePinataIndexFile = async (indexGroup: GroupResponseItem, fileName: st
     console.log(fileFound.cid)
     newContent = await fetchFile(fileFound.cid, true) as string
     console.log(`updating the index file: ${newContent}`)
-    const deleteResp: DeleteResponse[] = await pinata.files.delete([fileFound.cid])
+    const deleteResp: DeleteResponse[] = await pinata.files.delete([fileFound.id])
     console.log(`deleted original file: ${JSON.stringify(deleteResp)}`)
   }
 

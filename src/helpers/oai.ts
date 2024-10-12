@@ -33,7 +33,7 @@ const generateHTML = (content: string[], images: string[]) => {
 const generateImagePrompt = async (content: string) => {
   console.log('generating image prompt for: ', content)
   const messages = [
-    new SystemMessage(`You are an expert in creating image prompts for DallE. Generate a DallE image prompt for anything the user says. The style of the image should be ${IMAGE_STYLE}`),
+    new SystemMessage(`You are an expert in creating image prompts for DallE. Generate a DallE image prompt for anything the user says. The style of the image should be ${IMAGE_STYLE}. DO NOT violate the OpenAI safety and content guidelines.`),
     new HumanMessage(content)
   ]
 

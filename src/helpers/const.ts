@@ -9,6 +9,8 @@ const MODEL_DALLE = env.MODEL_DALLE ?? 'dall-e-3'
 const STORY_PARTS = env.STORY_PARTS ?? 3
 const IMAGE_STYLE = env.IMAGE_STYLE ?? 'Arthur Rackham'
 
+const REDIS_URL = env.REDIS_URL ?? 'redis://localhost:6379'
+
 export {
   PINATA_INDEX_GROUP_NAME,
   PINATA_INDEX_FILE_NAME,
@@ -17,4 +19,5 @@ export {
   MODEL_DALLE,
   STORY_PARTS,
   IMAGE_STYLE,
+  REDIS_URL,
 }

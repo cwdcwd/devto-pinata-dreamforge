@@ -5,16 +5,19 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "ts-node ./src/index.ts",
-    "build": "npx tsc",
-    "start": "node ./dist/server.js",
-    "dev": "nodemon ./src/server.ts"
+    "copy-public": "copyfiles -u 1 src/public/**/* dist",
+    "build": "tsc && npm run copy-public",
+    "start:server": "node ./dist/server.js",
+    "start:processor": "node ./dist/processor.js",
+    "dev": "nodemon --exec ./start.sh"
   },
   "author": "cwd <cwd@lazybaer.com>",
   "license": "ISC",
   "devDependencies": {
+    "@types/bull": "^3.15.9",
     "@types/express": "^5.0.0",
     "@types/node": "^22.7.5",
+    "copyfiles": "^2.4.1",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
