@@ -2,7 +2,6 @@ import { Router, Request, Response } from 'express'
 import Queue from 'bull'
 import generateStory from '../../helpers/generate'
 import { REDIS_URL } from '../../helpers/const'
-import { error } from 'console'
 
 const router = Router()
 

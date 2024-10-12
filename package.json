@@ -9,6 +9,7 @@
     "build": "tsc && npm run copy-public",
     "start:server": "node ./dist/server.js",
     "start:processor": "node ./dist/processor.js",
+    "start": "npm run start:server & npm run start:processor",
     "dev": "nodemon --exec ./start.sh"
   },
   "author": "cwd <cwd@lazybaer.com>",

@@ -22,7 +22,7 @@ const generateStory = async (prompt: string) => {
   //save images to IPFS
   const pinataUploads = await pushToPinata(storyObj, imageURLs)
   console.log(pinataUploads)
-  const content = (pinataUploads?.group?.id ?? '') + `:${storyObj.title}` 
+  const content = (pinataUploads?.group?.id ?? '') + `\t${storyObj.title}` 
   const indexFile = await updatePinataIndexFile(indexGroup, PINATA_INDEX_FILE_NAME, content)
   console.log(indexFile)
 }

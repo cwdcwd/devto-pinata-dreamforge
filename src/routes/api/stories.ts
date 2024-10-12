@@ -19,7 +19,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     const storiesGroups = content.split('\n')
     const stories = storiesGroups.map((storyGroup) => {
-      const [groupId, title] = storyGroup.split(':')
+      const [groupId, title] = storyGroup.split('\t')
       return { groupId, title }
     })
     res.json({ stories })

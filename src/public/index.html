@@ -48,9 +48,9 @@
                 </ul>
             </div>
             <div class="panel-right" id="storyContent">
-                <h5>Text Content</h5>
-                <p>This is some sample text content that will be displayed in the panel.</p>
-                <img src="https://via.placeholder.com/150" alt="Placeholder Image" class="responsive-img">
+                <!-- <h5></h5> -->
+                <!-- <p>.</p> -->
+                <!-- <img src="https://via.placeholder.com/150" alt="Placeholder Image" class="responsive-img"> -->
             </div>
         </div>
     </div>
@@ -66,23 +66,27 @@ const loadStoryContent = (groupId, storyTitle) => {
             storyContent.innerHTML = ''; // Clear existing content
 
             const title = document.createElement('h5');
-            title.textContent = data.storyTitle;
+            title.textContent = storyTitle;
             storyContent.appendChild(title);
 
             const textParts = storyParts.filter(part => part.name.startsWith('text')).sort((a, b) => a.name.localeCompare(b.name));
             const imageParts = storyParts.filter(part => part.name.startsWith('image')).sort((a, b) => a.name.localeCompare(b.name));
 
             textParts.forEach((part, index) => {
+                const contentPart = document.createElement('div');
+                contentPart.className = 'content-part';
+                storyContent.appendChild(contentPart);
+
                 const content = document.createElement('p');
                 content.className = 'flow-text';
                 content.id = `part-${part.name}`;
+                content.textContent = `Loading part ${index}...`;
 
                 fetch(`/api/stories/${groupId}/${part.name}`) // Fetch part content and then update the content element
                     .then(response => response.json())
                     .then(partData => {
                         const content = document.querySelector(`#part-${part.name}`);
                         content.textContent = partData.text;
-                        storyContent.appendChild(content);
                     })
                     .catch(error => console.error('Error fetching story part content:', error));
 
@@ -92,8 +96,8 @@ const loadStoryContent = (groupId, storyTitle) => {
                 image.alt = `Part ${index}`;
                 image.className = 'responsive-img';
 
-                storyContent.appendChild(content);
-                storyContent.appendChild(image);
+                contentPart.appendChild(content);
+                contentPart.appendChild(image);
             });
         })
         .catch(error => console.error('Error fetching story content:', error));

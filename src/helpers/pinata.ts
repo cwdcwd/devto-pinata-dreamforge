@@ -76,6 +76,7 @@ const updatePinataIndexFile = async (indexGroup: GroupResponseItem, fileName: st
     const fileFound: FileListItem = files.files[0]
     console.log(fileFound.cid)
     newContent = await fetchFile(fileFound.cid, true) as string
+    newContent += `\n${content}`
     console.log(`updating the index file: ${newContent}`)
     const deleteResp: DeleteResponse[] = await pinata.files.delete([fileFound.id])
     console.log(`deleted original file: ${JSON.stringify(deleteResp)}`)
