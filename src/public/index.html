@@ -154,9 +154,9 @@ const reloadStories = () => {
                         .then(data => {
                             if(data.failed === true) {
                                 clearInterval(checkStatus);
-                                console.error('Failed to generate story:', data.error);
+                                console.error('Failed to generate story:', data.failedReason);
                                 const storyContent = document.querySelector('#storyContent');
-                                storyContent.innerHTML = `<div class="error-message">Error fetching story: ${data.error}</div>`;
+                                storyContent.innerHTML = `<div class="error-message">Error fetching story: ${data.failedReason}</div>`;
                             } else if (data.status === 'completed') {
                                 clearInterval(checkStatus);
                                 console.log('Story:', data.story);
