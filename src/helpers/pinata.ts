@@ -110,6 +110,7 @@ const pushToPinata = async (content: StoryObject, images: string[]) => {
   })
 
   const imagesUploaded: UploadResponse[] = await Promise.all(images.map(async (image: string, index: number) => {
+    console.log(`uploading image ${index} to pinata: ${image}`)
     const upload: UploadResponse = await pinata.upload
       .url(image)
       .group(group.id)
