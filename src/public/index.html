@@ -130,8 +130,12 @@ const reloadStories = () => {
 
     document.addEventListener('DOMContentLoaded', function() {
         const submitButton = document.querySelector('#postStory');
+
         submitButton.addEventListener('click', function() {
             const inputText = document.querySelector('#input_text').value;
+            const storyContent = document.querySelector('#storyContent');
+            storyContent.innerHTML = '<div>Generating story</div><div class="preloader-wrapper big active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>';
+
             fetch('/api/stories', {
                 method: 'POST',
                 headers: {
@@ -151,10 +155,14 @@ const reloadStories = () => {
                             if(data.failed === true) {
                                 clearInterval(checkStatus);
                                 console.error('Failed to generate story:', data.error);
+                                const storyContent = document.querySelector('#storyContent');
+                                storyContent.innerHTML = `<div class="error-message">Error fetching story: ${data.error}</div>`;
                             } else if (data.status === 'completed') {
                                 clearInterval(checkStatus);
                                 console.log('Story:', data.story);
                                 reloadStories();
+                                const storyContent = document.querySelector('#storyContent');
+                                storyContent.innerHTML = '<div>Story generated. Please select from the list</div>';
                             } else {
                                 console.log('Status:', data.status);
                             }
@@ -162,6 +170,8 @@ const reloadStories = () => {
                         .catch(error => {
                             clearInterval(checkStatus);
                             console.error('Error fetching story:', error);
+                            const storyContent = document.querySelector('#storyContent');
+                            storyContent.innerHTML = `<div class="error-message">Error fetching story: ${error.message}</div>`;
                         });
                 }, 3000);
             })
