@@ -2,6 +2,7 @@ import { AuthTestResponse, DeleteResponse, FileListItem, FileListResponse, GetCI
 import { env } from "process"
 import { StoryObject, StoryPart } from "../types/Story"
 import exp from "constants"
+import e from "express"
 
 
 const PINATA_JWT = env.PINATA_JWT ?? ''
@@ -60,8 +61,16 @@ const fetchPinataIndexFileContents = async (indexGroup: GroupResponseItem, fileN
   const fileFound: FileListItem = files.files[0]
   console.log(fileFound.cid)
   const file: GetCIDResponse = await pinata.gateways.get(fileFound.cid)
-  const data = file.data as Blob
-  return await data.text() 
+  let str: string = ''
+
+  if (file.contentType === 'text/plain') {
+    str = await file.data as string
+  } else {
+    const data = file.data as Blob
+    str = await data.text()
+  }
+
+  return str
 }
 
 const updatePinataIndexFile = async (indexGroup: GroupResponseItem, fileName: string, content: string) => {
