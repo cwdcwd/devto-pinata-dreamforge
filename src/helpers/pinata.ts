@@ -42,8 +42,18 @@ const fetchFile = async (fileCId: string, asString?: boolean): Promise<string | 
   console.log(file)
   const data = file.data as Blob
 
-  if (asString)
-    return await data.text() 
+  if (asString) {
+    let str: string = ''
+
+    if (file.contentType === 'text/plain') {
+      str = file.data as string
+    } else {
+      const data = file.data as Blob
+      str = await data.text()
+    }
+
+    return str
+  }
 
   return data
 }
@@ -64,7 +74,7 @@ const fetchPinataIndexFileContents = async (indexGroup: GroupResponseItem, fileN
   let str: string = ''
 
   if (file.contentType === 'text/plain') {
-    str = await file.data as string
+    str = file.data as string
   } else {
     const data = file.data as Blob
     str = await data.text()
