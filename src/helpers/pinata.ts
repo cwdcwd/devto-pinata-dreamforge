@@ -45,7 +45,7 @@ const fetchFile = async (fileCId: string, asString?: boolean): Promise<string | 
   if (asString) {
     let str: string = ''
 
-    if (file.contentType === 'text/plain') {
+    if (file.contentType?.includes('text/plain')) {
       str = file.data as string
     } else {
       const data = file.data as Blob
@@ -73,7 +73,7 @@ const fetchPinataIndexFileContents = async (indexGroup: GroupResponseItem, fileN
   const file: GetCIDResponse = await pinata.gateways.get(fileFound.cid)
   let str: string = ''
 
-  if (file.contentType === 'text/plain') {
+  if (file.contentType?.includes('text/plain')) {
     str = file.data as string
   } else {
     const data = file.data as Blob
