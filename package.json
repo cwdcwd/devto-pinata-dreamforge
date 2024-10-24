@@ -27,7 +27,7 @@
     "bull": "^4.16.3",
     "express": "^4.21.1",
     "langchain": "^0.3.2",
-    "pinata": "^1.5.0",
+    "pinata": "^1.7.1",
     "redis": "^4.7.0"
   },
   "engines": {
