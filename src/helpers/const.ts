@@ -8,6 +8,7 @@ const MODEL_OAI = env.MODEL_OAI ?? 'gpt-4o-mini'
 const MODEL_DALLE = env.MODEL_DALLE ?? 'dall-e-3'
 const STORY_PARTS = env.STORY_PARTS ?? 3
 const IMAGE_STYLE = env.IMAGE_STYLE ?? 'Pencil and Ink'
+const MODEL_OAI_TEMP = env.MODEL_OAI_TEMP !== undefined ? parseFloat(env.MODEL_OAI_TEMP) || 0.75 : 0.75
 
 const REDIS_URL = env.REDIS_URL ?? 'redis://localhost:6379'
 
@@ -20,4 +21,5 @@ export {
   STORY_PARTS,
   IMAGE_STYLE,
   REDIS_URL,
+  MODEL_OAI_TEMP
 }

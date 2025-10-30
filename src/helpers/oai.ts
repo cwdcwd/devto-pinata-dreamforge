@@ -4,13 +4,13 @@ import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { JsonOutputParser, StringOutputParser } from '@langchain/core/output_parsers'
 import { DallEAPIWrapper } from "@langchain/openai"
 import { StoryObject } from "../types/Story"
-import { IMAGE_STYLE, LLM_OAI_KEY, MODEL_DALLE, MODEL_OAI, STORY_PARTS } from "./const"
+import { IMAGE_STYLE, LLM_OAI_KEY, MODEL_DALLE, MODEL_OAI, STORY_PARTS, MODEL_OAI_TEMP } from "./const"
 
 // set up connection to Open AI with langchain
 const model = new ChatOpenAI({
   model: MODEL_OAI,
   apiKey: LLM_OAI_KEY,
-  temperature: 0.75
+  temperature: MODEL_OAI_TEMP
 });
 
 const generateImage = async (prompt: string) => {
